@@ -28,12 +28,13 @@ def wait_in_task(task_seconds, journal):
         try:
             start_sleep = time.time()
             print ("Waiting for:", int(time_remaining), "s (", int(time_remaining/60), "m )")
+            print ("Press Ctrl-c to pause and view options")
             sleep(time_remaining)
             continue_waiting = False
         except KeyboardInterrupt:
             time_remaining = time_remaining - (time.time() - start_sleep)            
-            print_and_log("Task Paused.", journal)
-            action = input("Continue this task, go to Next task, Defer task, or End? (c/n/d/e) ")
+            print_and_log("Task Paused", journal)
+            action = input("Continue this task, go to Next task, Defer task to end, or Exit? (c/n/d/e) ")
             if action == 'e':
                 journal.close()
                 sys.exit(1)
@@ -43,7 +44,7 @@ def wait_in_task(task_seconds, journal):
                 continue_waiting = False
                 defer_task = True
             else:
-                print_and_log("Continuing task.", journal)
+                print_and_log("Continuing task", journal)
                 
     return defer_task
 
@@ -97,6 +98,7 @@ print_and_log("Total tasks: "+str(len(tasks)), journal)
 # Determine the minutes per task
 task_seconds = int(get_seconds_left_to_work(end_time)/len(tasks))
 print_and_log(print_seconds_to_minutes(task_seconds),journal)
+print()
 
 # Automatically present the current task
 task_id = 0
@@ -105,8 +107,6 @@ while len(tasks) > 0:
     this_task = tasks.pop(0)
     task_id = task_id+1
     print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
-    if len(tasks) > 0: print("Next task:", tasks[0][0])
-    
     check_defer = wait_in_task(task_seconds, journal)
     if check_defer == True: tasks.append(this_task)
         
@@ -121,6 +121,7 @@ while len(tasks) > 0:
         break
     
     # Advance to the next task only when confirmed
+    if len(tasks) > 0: print("Next task:",str(task_id+1)+".", tasks[0][0])
     input("Press Enter to continue")
 
             
