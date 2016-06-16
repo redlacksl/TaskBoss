@@ -20,28 +20,32 @@ from datetime import datetime
 from time import sleep
 import time
 
-def wait_in_task(task_seconds, journal):    
+def wait_in_task(task_seconds, journal):
+    defer_task = False    
     time_remaining = task_seconds
     continue_waiting = True
     while (continue_waiting and time_remaining > 0):
         try:
             start_sleep = time.time()
-            print ("Waiting for :", int(time_remaining), "s (", int(time_remaining/60), "m )")
+            print ("Waiting for:", int(time_remaining), "s (", int(time_remaining/60), "m )")
             sleep(time_remaining)
             continue_waiting = False
         except KeyboardInterrupt:
             time_remaining = time_remaining - (time.time() - start_sleep)            
             print_and_log("Task Paused.", journal)
-            action = input("Continue this task, go to Next task or End? (c/n/e) ")
+            action = input("Continue this task, go to Next task, Defer task, or End? (c/n/d/e) ")
             if action == 'e':
                 journal.close()
                 sys.exit(1)
             elif action == 'n':
-                continue_waiting = False            
+                continue_waiting = False
+            elif action == 'd':
+                continue_waiting = False
+                defer_task = True
             else:
                 print_and_log("Continuing task.", journal)
                 
-    return
+    return defer_task
 
 def print_and_log( output, journal ):
     print(output)
@@ -89,37 +93,39 @@ journal = open(journal_path, 'w')
 
 # Determine how many tasks to run today
 print_and_log("Total tasks: "+str(len(tasks)), journal)
-goal_count = int(len(tasks)/cycle_rate)
-print_and_log( "Target tasks today: " + str(goal_count), journal )
 
 # Determine the minutes per task
-task_seconds = int(get_seconds_left_to_work(end_time)/goal_count)
+task_seconds = int(get_seconds_left_to_work(end_time)/len(tasks))
 print_and_log(print_seconds_to_minutes(task_seconds),journal)
 
 # Automatically present the current task
-for i in range(goal_count):
-    # TaskID is the task index + 1
-    task_id = i+1
-    print_and_log (str(task_id) + ". " + tasks[i][0], journal)
+task_id = 0
+
+while len(tasks) > 0:
+    this_task = tasks.pop(0)
+    task_id = task_id+1
+    print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
+    if len(tasks) > 0: print("Next task:", tasks[0][0])
     
-    wait_in_task(task_seconds, journal)
-    
+    check_defer = wait_in_task(task_seconds, journal)
+    if check_defer == True: tasks.append(this_task)
+        
     # Beep twice
     for j in range(2):
         print (chr(7))
         sleep(1)
 
     # Exit if end of the list is reached (avoids div-by-zero error)
-    if goal_count == task_id:
+    if len(tasks) == 0:
         main_loop = False
         break
     
     # Advance to the next task only when confirmed
-    print("Next Task:",tasks[i+1][0])
     input("Press Enter to continue")
-          
+
+            
     # Recalculate the new per-task time            
-    task_seconds = int(get_seconds_left_to_work(end_time) / (goal_count - task_id))
+    task_seconds = int(get_seconds_left_to_work(end_time) / len(tasks))
     if task_seconds < 1: task_seconds = 1
     print_and_log(print_seconds_to_minutes(task_seconds),journal)                        
 
