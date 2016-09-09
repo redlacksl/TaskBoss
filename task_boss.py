@@ -65,17 +65,17 @@ def get_seconds_left_to_work(end_time):
 sa = sys.argv
 lsa = len(sys.argv)
 if lsa != 5:
-    print ("Usage: [ python ] task_boss.py working_path file_name cycle_rate(days) end_hour(24hr format) end_minute")
-    print ("Example: [ python ] task_boss.py working_path file.txt 5 16 30")
+    print ("Usage: [ python ] task_boss.py working_path file_name minimum_time_box(minutes) end_hour(24hr format) end_minute")
+    print ("Example: [ python ] task_boss.py working_path file.txt 15 16 30")
     print ("The program assumes the task list has a header row and will ignore it")
     sa.append(input("Filename: "))
-    sa.append(input("Cycle Rate: "))
+    sa.append(input("Min Time Box: "))
     sa.append(input("End Hour: "))
     sa.append(input("End Minute: "))
 
 os.chdir(os.path.dirname(sa[1]))
 journal_path = date.today().isoformat() + "_task_journal.txt"
-cycle_rate = int(sa[2])
+min_time_box = int(sa[2])
 
 now_time = datetime.now()
 end_time = now_time.replace(hour=int(sa[3]), minute=int(sa[4]))
@@ -97,6 +97,7 @@ print_and_log("Total tasks: "+str(len(tasks)), journal)
 
 # Determine the minutes per task
 task_seconds = int(get_seconds_left_to_work(end_time)/len(tasks))
+if task_seconds < min_time_box * 60: task_seconds = min_time_box * 60
 print_and_log(print_seconds_to_minutes(task_seconds),journal)
 print()
 
@@ -127,7 +128,7 @@ while len(tasks) > 0:
             
     # Recalculate the new per-task time            
     task_seconds = int(get_seconds_left_to_work(end_time) / len(tasks))
-    if task_seconds < 1: task_seconds = 1
+    if task_seconds < min_time_box * 60: task_seconds = min_time_box * 60
     print_and_log(print_seconds_to_minutes(task_seconds),journal)                        
 
 print_and_log("All done. Exiting", journal)  
