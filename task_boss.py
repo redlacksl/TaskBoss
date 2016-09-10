@@ -97,8 +97,11 @@ print_and_log("Total tasks: "+str(len(tasks)), journal)
 
 # Determine the minutes per task
 task_seconds = int(get_seconds_left_to_work(end_time)/len(tasks))
-if task_seconds < min_time_box * 60: task_seconds = min_time_box * 60
-print_and_log(print_seconds_to_minutes(task_seconds),journal)
+adjusted_task_seconds = task_seconds
+if adjusted_task_seconds < min_time_box * 60:
+    adjusted_task_seconds = min_time_box * 60
+print("Task time:",adjusted_task_seconds,"(",task_seconds,")")
+print_and_log(print_seconds_to_minutes(adjusted_task_seconds),journal)
 print()
 
 # Automatically present the current task
@@ -108,7 +111,7 @@ while len(tasks) > 0:
     this_task = tasks.pop(0)
     task_id = task_id+1
     print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
-    check_defer = wait_in_task(task_seconds, journal)
+    check_defer = wait_in_task(adjusted_task_seconds, journal)
     if check_defer == True: tasks.append(this_task)
         
     # Beep twice
@@ -128,8 +131,11 @@ while len(tasks) > 0:
             
     # Recalculate the new per-task time            
     task_seconds = int(get_seconds_left_to_work(end_time) / len(tasks))
-    if task_seconds < min_time_box * 60: task_seconds = min_time_box * 60
-    print_and_log(print_seconds_to_minutes(task_seconds),journal)                        
+    adjusted_task_seconds = task_seconds
+    if adjusted_task_seconds < min_time_box * 60:
+        adjusted_task_seconds = min_time_box * 60
+    print("Task time:",adjusted_task_seconds,"(",task_seconds,")")
+    print_and_log(print_seconds_to_minutes(adjusted_task_seconds),journal)                        
 
 print_and_log("All done. Exiting", journal)  
 journal.close()
