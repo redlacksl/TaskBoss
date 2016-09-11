@@ -27,8 +27,9 @@ def wait_in_task(task_seconds, journal):
     while (continue_waiting and time_remaining > 0):
         try:
             start_sleep = time.time()
-            print ("Waiting for:", int(time_remaining), "s (", int(time_remaining/60), "m )")
-            print ("Press Ctrl-c to pause and view options")
+            print("Waiting for:", int(time_remaining), "s (", int(time_remaining/60), "m )")
+            print()           
+            print("Press Ctrl-c to pause and view options")
             sleep(time_remaining)
             continue_waiting = False
         except KeyboardInterrupt:
@@ -107,7 +108,7 @@ print()
 # Automatically present the current task
 task_id = 0
 
-while len(tasks) > 0:
+while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
     this_task = tasks.pop(0)
     task_id = task_id+1
     print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
