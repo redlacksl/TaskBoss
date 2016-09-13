@@ -14,6 +14,7 @@ TODO: Add 'actual time spent' to post-task step
 import csv
 import sys
 import os
+import math
  
 from datetime import date
 from datetime import datetime
@@ -59,6 +60,17 @@ def print_seconds_to_minutes( seconds ):
     else: minutes = str(int(seconds/60))
     return "Minutes per task: " + minutes
 
+def print_task_time_with_overdrive(task_seconds, min_time_box):
+    adjusted_task_seconds = task_seconds
+    if adjusted_task_seconds < min_time_box * 60:
+        adjusted_task_seconds = min_time_box * 60
+    percentage = int(adjusted_task_seconds/task_seconds*100)
+    if percentage == 100:
+        print("Task time:",adjusted_task_seconds)
+    else:
+        print("Task time: " + str(adjusted_task_seconds) + " (" + str(percentage) + "% overdrive)")
+    return adjusted_task_seconds
+
 def get_seconds_left_to_work(end_time):
     return (end_time - datetime.now()).total_seconds()
     
@@ -98,10 +110,7 @@ print_and_log("Total tasks: "+str(len(tasks)), journal)
 
 # Determine the minutes per task
 task_seconds = int(get_seconds_left_to_work(end_time)/len(tasks))
-adjusted_task_seconds = task_seconds
-if adjusted_task_seconds < min_time_box * 60:
-    adjusted_task_seconds = min_time_box * 60
-print("Task time:",adjusted_task_seconds,"(",task_seconds,")")
+adjusted_task_seconds = print_task_time_with_overdrive(task_seconds, min_time_box)
 print_and_log(print_seconds_to_minutes(adjusted_task_seconds),journal)
 print()
 
@@ -109,11 +118,21 @@ print()
 task_id = 0
 
 while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
-    this_task = tasks.pop(0)
+    task_block_count = math.ceil(adjusted_task_seconds/task_seconds)
     task_id = task_id+1
-    print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
+    task_block = []
+    for i in range(task_block_count):
+        try: 
+            task_block.append(tasks.pop(0))
+        except IndexError:
+            break
+    
+    for this_task in task_block:
+        print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
     check_defer = wait_in_task(adjusted_task_seconds, journal)
-    if check_defer == True: tasks.append(this_task)
+    if check_defer == True:
+        for this_task in task_block:
+            tasks.append(this_task)
         
     # Beep twice
     for j in range(2):
@@ -132,10 +151,7 @@ while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
             
     # Recalculate the new per-task time            
     task_seconds = int(get_seconds_left_to_work(end_time) / len(tasks))
-    adjusted_task_seconds = task_seconds
-    if adjusted_task_seconds < min_time_box * 60:
-        adjusted_task_seconds = min_time_box * 60
-    print("Task time:",adjusted_task_seconds,"(",task_seconds,")")
+    adjusted_task_seconds = print_task_time_with_overdrive(task_seconds, min_time_box)
     print_and_log(print_seconds_to_minutes(adjusted_task_seconds),journal)                        
 
 print_and_log("All done. Exiting", journal)  
