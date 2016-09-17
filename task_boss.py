@@ -21,6 +21,23 @@ from datetime import datetime
 from time import sleep
 import time
 
+def wait_in_rest():
+     try:
+         input("Press Enter to start 5 minute rest.")
+         print("Resting. Press Ctrl-c to continue tasks.")
+         sleep(60*5)
+     except KeyboardInterrupt:
+         print("Rest Stopped. Continuing flow.")
+     beep()
+
+
+def beep():
+    # Beep twice
+    for j in range(2):
+        print (chr(7))
+        sleep(1)
+
+
 def wait_in_task(task_seconds, journal):
     defer_task = False    
     time_remaining = task_seconds
@@ -134,15 +151,16 @@ while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
         for this_task in task_block:
             tasks.append(this_task)
         
-    # Beep twice
-    for j in range(2):
-        print (chr(7))
-        sleep(1)
+    # Beep when done
+    beep()
 
     # Exit if end of the list is reached (avoids div-by-zero error)
     if len(tasks) == 0:
         main_loop = False
         break
+    
+    # Take 5 minute rest
+    wait_in_rest()
     
     # Advance to the next task only when confirmed
     if len(tasks) > 0: print("Next task:",str(task_id+1)+".", tasks[0][0])
