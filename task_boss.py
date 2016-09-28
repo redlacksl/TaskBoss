@@ -153,18 +153,17 @@ while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
         
     # Beep when done
     beep()
-
-    # Exit if end of the list is reached (avoids div-by-zero error)
-    if len(tasks) == 0:
-        main_loop = False
-        break
     
     # Take 5 minute rest
     wait_in_rest()
     
     # Advance to the next task only when confirmed
-    if len(tasks) > 0: print("Next task:",str(task_id+1)+".", tasks[0][0])
-    input("Press Enter to continue")
+    if len(tasks) > 0:
+        # Preview item in next task block
+        print("Next task:",str(task_id+1)+".", tasks[0][0])
+        input("Press Enter to continue")
+    else:
+        break
 
             
     # Recalculate the new per-task time            
