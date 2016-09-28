@@ -143,7 +143,7 @@ while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
             task_block.append(tasks.pop(0))
         except IndexError:
             break
-    
+    task_block.sort(reverse=True)
     for this_task in task_block:
         print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
     check_defer = wait_in_task(adjusted_task_seconds, journal)
