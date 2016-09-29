@@ -173,3 +173,5 @@ while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
 
 print_and_log("All done. Exiting", journal)  
 journal.close()
+input("Press Enter to close")
+
