@@ -15,7 +15,8 @@ import csv
 import sys
 import os
 import math
- 
+import random
+
 from datetime import date
 from datetime import datetime
 from time import sleep
@@ -113,12 +114,16 @@ end_time = now_time.replace(hour=int(sa[3]), minute=int(sa[4]))
 print("It is now", now_time.strftime("%I:%M %p"))
 print("Finish tasks at", end_time.strftime("%I:%M %p"))
 
+tasks = []
 with open(sa[1]) as f:
     reader = csv.reader(f, delimiter='\t')
     tasks = list(reader)
     
     # Remove the header row
     del tasks[0]
+
+# Shuffle the task list
+random.shuffle(tasks)
     
 journal = open(journal_path, 'w')
 
