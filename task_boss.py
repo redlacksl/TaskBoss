@@ -76,7 +76,7 @@ def print_and_log( output, journal ):
 def print_seconds_to_minutes( seconds ):
     if (seconds < 60): minutes = "< 1"
     else: minutes = str(int(seconds/60))
-    return "Minutes per task: " + minutes
+    return "Minutes per task block: " + minutes
 
 def print_task_time_with_overdrive(task_seconds, min_time_box):
     adjusted_task_seconds = task_seconds
@@ -139,7 +139,7 @@ print()
 # Automatically present the current task
 task_id = 0
 
-while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
+while len(tasks) > 0:
     task_block_count = math.ceil(adjusted_task_seconds/task_seconds)
     task_id = task_id+1
     task_block = []
@@ -159,8 +159,9 @@ while len(tasks) > 0 and get_seconds_left_to_work(end_time) > 0:
     # Beep when done
     beep()
     
-    # Take 5 minute rest
-    wait_in_rest()
+    # Take 5 minute rest if there is still time left
+    if get_seconds_left_to_work(end_time) > 0:
+        wait_in_rest()
     
     # Advance to the next task only when confirmed
     if len(tasks) > 0:
