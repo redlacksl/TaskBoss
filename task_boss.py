@@ -141,6 +141,11 @@ task_id = 0
 
 while len(tasks) > 0:
     task_block_count = math.ceil(adjusted_task_seconds/task_seconds)
+    
+    # If overtime, then do all remaining tasks in one block
+    if task_block_count < 0:
+        task_block_count = len(tasks)
+        
     task_id = task_id+1
     task_block = []
     for i in range(task_block_count):
