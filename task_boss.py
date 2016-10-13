@@ -22,11 +22,13 @@ from datetime import datetime
 from time import sleep
 import time
 
-def wait_in_rest():
+def wait_in_rest(task_seconds):
      try:
-         input("Press Enter to start 5 minute rest.")
+         rest_seconds = int(task_seconds/4)
+         rest_minutes = int(rest_seconds/60)
+         input("Press Enter to start " + rest_minutes + " minute rest.")
          print("Resting. Press Ctrl-c to continue tasks.")
-         sleep(60*5)
+         sleep(rest_seconds)
      except KeyboardInterrupt:
          print("Rest Stopped. Continuing flow.")
      beep()
@@ -140,7 +142,8 @@ print()
 task_id = 0
 
 while len(tasks) > 0:
-    task_block_count = math.ceil(adjusted_task_seconds/task_seconds)
+    # Add 25% to task seconds to account for rest period
+    task_block_count = math.ceil(adjusted_task_seconds*1.25/task_seconds)
     
     # If overtime, then do all remaining tasks in one block
     if task_block_count < 0:
@@ -166,7 +169,7 @@ while len(tasks) > 0:
     
     # Take 5 minute rest if there is still time left
     if get_seconds_left_to_work(end_time) > 0:
-        wait_in_rest()
+        wait_in_rest(adjusted_task_seconds)
     
     # Advance to the next task only when confirmed
     if len(tasks) > 0:
