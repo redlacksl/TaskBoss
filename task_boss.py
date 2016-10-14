@@ -26,7 +26,7 @@ def wait_in_rest(task_seconds):
      try:
          rest_seconds = int(task_seconds/4)
          rest_minutes = int(rest_seconds/60)
-         input("Press Enter to start " + rest_minutes + " minute rest.")
+         input("Press Enter to start " + str(rest_minutes) + " minute rest.")
          print("Resting. Press Ctrl-c to continue tasks.")
          sleep(rest_seconds)
      except KeyboardInterrupt:
