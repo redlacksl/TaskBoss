@@ -13,7 +13,6 @@ TODO: Add 'actual time spent' to post-task step
 
 import csv
 import sys
-import os
 import math
 import random
 
@@ -97,17 +96,17 @@ def get_seconds_left_to_work(end_time):
     
 sa = sys.argv
 lsa = len(sys.argv)
-if lsa != 5:
-    print ("Usage: [ python ] task_boss.py working_path file_name minimum_time_box(minutes) end_hour(24hr format) end_minute")
-    print ("Example: [ python ] task_boss.py working_path file.txt 15 16 30")
+if lsa != 6:
+    print ("Usage: [ python ] task_boss.py file_name minimum_time_box(minutes) end_hour(24hr format) end_minute output_folder")
+    print ("Example: [ python ] task_boss.py working_path file.txt 15 16 30 output_path")
     print ("The program assumes the task list has a header row and will ignore it")
     sa.append(input("Filename: "))
     sa.append(input("Min Time Box: "))
     sa.append(input("End Hour: "))
     sa.append(input("End Minute: "))
+    sa.append(input("Output file location: "))
 
-os.chdir(os.path.dirname(sa[1]))
-journal_path = date.today().isoformat() + "_task_journal.txt"
+journal_path = str(sa[5]) + "-" + date.today().isoformat() + ".txt"
 min_time_box = int(sa[2])
 
 now_time = datetime.now()
@@ -116,6 +115,7 @@ end_time = now_time.replace(hour=int(sa[3]), minute=int(sa[4]))
 print("It is now", now_time.strftime("%I:%M %p"))
 print("Finish tasks at", end_time.strftime("%I:%M %p"))
 
+# Read the tasks list
 tasks = []
 with open(sa[1]) as f:
     reader = csv.reader(f, delimiter='\t')
@@ -187,5 +187,4 @@ while len(tasks) > 0:
 
 print_and_log("All done. Exiting", journal)  
 journal.close()
-input("Press Enter to close")
-
+print("Journal closed")
