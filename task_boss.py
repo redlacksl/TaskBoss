@@ -142,8 +142,8 @@ print()
 task_id = 0
 
 while len(tasks) > 0:
-    # Add 25% to task seconds to account for rest period
-    task_block_count = math.ceil(adjusted_task_seconds*1.25/task_seconds)
+    # Double the task seconds to account for a 50% slack target
+    task_block_count = math.ceil(adjusted_task_seconds*2/task_seconds)
     
     # If overtime, then do all remaining tasks in one block
     if task_block_count < 0:
