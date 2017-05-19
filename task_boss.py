@@ -23,8 +23,8 @@ import time
 
 def wait_in_rest(task_seconds):
      try:
-         rest_seconds = int(task_seconds/4)
-         rest_minutes = int(rest_seconds/60)
+         rest_seconds = 300
+         rest_minutes = 5 
          input("Press Enter to start " + str(rest_minutes) + " minute rest.")
          print("Resting. Press Ctrl-c to continue tasks.")
          sleep(rest_seconds)
@@ -90,9 +90,22 @@ def print_task_time_with_overdrive(task_seconds, min_time_box):
         print("Task time: " + str(adjusted_task_seconds) + " (" + str(percentage) + "% overdrive)")
     return adjusted_task_seconds
 
-def get_seconds_left_to_work(end_time):
-    return (end_time - datetime.now()).total_seconds()
+def get_tasks_per_block(end_time, min_time_box, tasks):
+    null_seconds = int(input("How many minutes are unavailable (meetings, etc)? ")) * 60
+    total_task_seconds = int((end_time - datetime.now()).total_seconds()-null_seconds)
+    task_seconds = int(total_task_seconds/len(tasks))
+    # Determine how many tasks fit in a work block
+    # Increase the time block by 25% to account for rest time
+    tasks_per_block = len(tasks)
+    if (task_seconds > 0):
+        tasks_per_block = math.ceil((min_time_box*1.25*60)/task_seconds)
+    print('Tasks per block:',tasks_per_block)
+    print('Minutes per task block:',min_time_box)
+    expected_blocks = math.ceil(total_task_seconds/(min_time_box*60))
+    print('Expected task blocks:',expected_blocks)
+    return tasks_per_block
     
+
     
 sa = sys.argv
 lsa = len(sys.argv)
@@ -131,35 +144,26 @@ journal = open(journal_path, 'w')
 
 # Determine how many tasks to run today
 print_and_log("Total tasks: "+str(len(tasks)), journal)
-
-# Determine the minutes per task
-task_seconds = int(get_seconds_left_to_work(end_time)/len(tasks))
-adjusted_task_seconds = print_task_time_with_overdrive(task_seconds, min_time_box)
-print_and_log(print_seconds_to_minutes(adjusted_task_seconds),journal)
 print()
 
-# Automatically present the current task
+# Automatically present the current task block
 task_id = 0
 
 while len(tasks) > 0:
-    # Double the task seconds to account for a 50% slack target
-    task_block_count = math.ceil(adjusted_task_seconds*2/task_seconds)
-    
-    # If overtime, then do all remaining tasks in one block
-    if task_block_count < 0:
-        task_block_count = len(tasks)
         
     task_id = task_id+1
     task_block = []
-    for i in range(task_block_count):
+    tasks_per_block = get_tasks_per_block(end_time, min_time_box, tasks)
+    for i in range(tasks_per_block):
         try: 
             task_block.append(tasks.pop(0))
         except IndexError:
+            print('ERROR: Index ERROR')
             break
     task_block.sort(reverse=True)
     for this_task in task_block:
         print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
-    check_defer = wait_in_task(adjusted_task_seconds, journal)
+    check_defer = wait_in_task(min_time_box * 60, journal)
     if check_defer == True:
         for this_task in task_block:
             tasks.append(this_task)
@@ -167,23 +171,20 @@ while len(tasks) > 0:
     # Beep when done
     beep()
     
+    #if get_seconds_left_to_work(end_time) > 0:
     # Take 5 minute rest if there is still time left
-    if get_seconds_left_to_work(end_time) > 0:
-        wait_in_rest(adjusted_task_seconds)
+    if (datetime.now() < end_time):
+        wait_in_rest(min_time_box)
+    else:
+        print('End reached. Setting up overflow')
     
     # Advance to the next task only when confirmed
     if len(tasks) > 0:
-        # Preview item in next task block
-        print("Next task:",str(task_id+1)+".", tasks[0][0])
+        print("Preparing next task block")
         input("Press Enter to continue")
     else:
+        print("Task list is now empty")
         break
-
-            
-    # Recalculate the new per-task time            
-    task_seconds = int(get_seconds_left_to_work(end_time) / len(tasks))
-    adjusted_task_seconds = print_task_time_with_overdrive(task_seconds, min_time_box)
-    print_and_log(print_seconds_to_minutes(adjusted_task_seconds),journal)                        
 
 print_and_log("All done. Exiting", journal)  
 journal.close()
