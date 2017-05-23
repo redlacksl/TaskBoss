@@ -66,18 +66,23 @@ def wait_in_task(task_seconds):
     return defer_task
 
 def get_tasks_per_block(end_time, min_time_box, tasks):
+    adjusted_min_time_box = int(min_time_box * 1.25)
+    print('Minutes per task block (with rests):',adjusted_min_time_box)
+    
+    # Get the time lost due to meetings, etc.
     null_seconds = int(input("How many minutes are unavailable (meetings, etc)? ")) * 60
+    
+    # Get the total number of usable seconds
     total_task_seconds = int((end_time - datetime.now()).total_seconds()-null_seconds)
-    task_seconds = int(total_task_seconds/len(tasks))
-    # Determine how many tasks fit in a work block
-    # Increase the time block by 25% to account for rest time
-    tasks_per_block = len(tasks)
-    if (task_seconds > 0):
-        tasks_per_block = math.ceil((min_time_box*1.25*60)/task_seconds)
-    print('Tasks per block:',tasks_per_block)
-    print('Minutes per task block:',min_time_box)
-    expected_blocks = math.ceil(total_task_seconds/(min_time_box*60))
+
+    # Get the number of expected blocks in the time available
+    if (total_task_seconds < 0): total_task_seconds = 1 
+    expected_blocks = math.ceil(total_task_seconds/(adjusted_min_time_box*60))
     print('Remaining task blocks:',expected_blocks)
+    
+    # Determine how many tasks fit in a work block
+    tasks_per_block = math.ceil(len(tasks)/expected_blocks)
+    print('Tasks per block:',tasks_per_block)
     return tasks_per_block
     
 
@@ -121,7 +126,6 @@ print()
 task_id = 0
 
 while len(tasks) > 0:
-        
     task_id = task_id+1
     task_block = []
     tasks_per_block = get_tasks_per_block(end_time, min_time_box, tasks)
@@ -132,8 +136,10 @@ while len(tasks) > 0:
             print('ERROR: Index ERROR')
             break
     task_block.sort(reverse=True)
+    task_block_index = 1
     for this_task in task_block:
-        print("This task: ", str(task_id) + ".",this_task[0])
+        print("This task: ", str(task_id) + "." + str(task_block_index), this_task[0])
+        task_block_index += 1
     check_defer = wait_in_task(min_time_box * 60)
     if check_defer == True:
         for this_task in task_block:
@@ -146,8 +152,6 @@ while len(tasks) > 0:
     # Take 5 minute rest if there is still time left
     if (datetime.now() < end_time):
         wait_in_rest(min_time_box)
-    else:
-        print('End reached. Setting up overflow')
     
     # Advance to the next task only when confirmed
     if len(tasks) > 0:
