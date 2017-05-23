@@ -77,7 +77,7 @@ def get_tasks_per_block(end_time, min_time_box, tasks):
     print('Tasks per block:',tasks_per_block)
     print('Minutes per task block:',min_time_box)
     expected_blocks = math.ceil(total_task_seconds/(min_time_box*60))
-    print('Expected task blocks:',expected_blocks)
+    print('Remaining task blocks:',expected_blocks)
     return tasks_per_block
     
 
