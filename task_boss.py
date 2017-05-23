@@ -7,8 +7,6 @@ the list into time boxes.
 It will prompt when to finish the current task and advance to the next one.
 You can hit Ctrl-C to interrupt the wait and will get options to finish the 
  task early or continue when ready.
- 
-TODO: Add 'actual time spent' to post-task step
 """
 
 import csv
@@ -16,7 +14,6 @@ import sys
 import math
 import random
 
-from datetime import date
 from datetime import datetime
 from time import sleep
 import time
@@ -40,7 +37,7 @@ def beep():
         sleep(1)
 
 
-def wait_in_task(task_seconds, journal):
+def wait_in_task(task_seconds):
     defer_task = False    
     time_remaining = task_seconds
     continue_waiting = True
@@ -54,10 +51,9 @@ def wait_in_task(task_seconds, journal):
             continue_waiting = False
         except KeyboardInterrupt:
             time_remaining = time_remaining - (time.time() - start_sleep)            
-            print_and_log("Task Paused", journal)
+            print("Task Paused")
             action = input("Continue this task, go to Next task, Defer task to end, or Exit? (c/n/d/e) ")
             if action == 'e':
-                journal.close()
                 sys.exit(1)
             elif action == 'n':
                 continue_waiting = False
@@ -65,30 +61,9 @@ def wait_in_task(task_seconds, journal):
                 continue_waiting = False
                 defer_task = True
             else:
-                print_and_log("Continuing task", journal)
+                print("Continuing task")
                 
     return defer_task
-
-def print_and_log( output, journal ):
-    print(output)
-    journal.write(output + '\n')
-    return
-
-def print_seconds_to_minutes( seconds ):
-    if (seconds < 60): minutes = "< 1"
-    else: minutes = str(int(seconds/60))
-    return "Minutes per task block: " + minutes
-
-def print_task_time_with_overdrive(task_seconds, min_time_box):
-    adjusted_task_seconds = task_seconds
-    if adjusted_task_seconds < min_time_box * 60:
-        adjusted_task_seconds = min_time_box * 60
-    percentage = int(adjusted_task_seconds/task_seconds*100)
-    if percentage == 100:
-        print("Task time:",adjusted_task_seconds)
-    else:
-        print("Task time: " + str(adjusted_task_seconds) + " (" + str(percentage) + "% overdrive)")
-    return adjusted_task_seconds
 
 def get_tasks_per_block(end_time, min_time_box, tasks):
     null_seconds = int(input("How many minutes are unavailable (meetings, etc)? ")) * 60
@@ -110,16 +85,14 @@ def get_tasks_per_block(end_time, min_time_box, tasks):
 sa = sys.argv
 lsa = len(sys.argv)
 if lsa != 6:
-    print ("Usage: [ python ] task_boss.py file_name minimum_time_box(minutes) end_hour(24hr format) end_minute output_folder")
-    print ("Example: [ python ] task_boss.py working_path file.txt 15 16 30 output_path")
+    print ("Usage: [ python ] task_boss.py file_name minimum_time_box(minutes) end_hour(24hr format) end_minute")
+    print ("Example: [ python ] task_boss.py working_path file.txt 15 16 30")
     print ("The program assumes the task list has a header row and will ignore it")
     sa.append(input("Filename: "))
     sa.append(input("Min Time Box: "))
     sa.append(input("End Hour: "))
     sa.append(input("End Minute: "))
-    sa.append(input("Output file location: "))
 
-journal_path = str(sa[5]) + "-" + date.today().isoformat() + ".txt"
 min_time_box = int(sa[2])
 
 now_time = datetime.now()
@@ -140,10 +113,8 @@ with open(sa[1]) as f:
 # Shuffle the task list
 random.shuffle(tasks)
     
-journal = open(journal_path, 'w')
-
 # Determine how many tasks to run today
-print_and_log("Total tasks: "+str(len(tasks)), journal)
+print("Total tasks: ",str(len(tasks)))
 print()
 
 # Automatically present the current task block
@@ -162,8 +133,8 @@ while len(tasks) > 0:
             break
     task_block.sort(reverse=True)
     for this_task in task_block:
-        print_and_log ("This task: " + str(task_id) + ". " + this_task[0], journal)
-    check_defer = wait_in_task(min_time_box * 60, journal)
+        print("This task: ", str(task_id) + ".",this_task[0])
+    check_defer = wait_in_task(min_time_box * 60)
     if check_defer == True:
         for this_task in task_block:
             tasks.append(this_task)
@@ -186,6 +157,4 @@ while len(tasks) > 0:
         print("Task list is now empty")
         break
 
-print_and_log("All done. Exiting", journal)  
-journal.close()
-print("Journal closed")
+print("All done.")  
