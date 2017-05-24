@@ -18,13 +18,12 @@ from datetime import datetime
 from time import sleep
 import time
 
-def wait_in_rest(task_seconds):
+def wait_in_rest(time_box_minutes):
      try:
-         rest_seconds = 300
-         rest_minutes = 5 
+         rest_minutes = int(time_box_minutes/4) 
          input("Press Enter to start " + str(rest_minutes) + " minute rest.")
          print("Resting. Press Ctrl-c to continue tasks.")
-         sleep(rest_seconds)
+         sleep(rest_minutes*60)
      except KeyboardInterrupt:
          print("Rest Stopped. Continuing flow.")
      beep()
@@ -138,7 +137,7 @@ while len(tasks) > 0:
     task_block.sort(reverse=True)
     task_block_index = 1
     for this_task in task_block:
-        print("This task: ", str(task_id) + "." + str(task_block_index), this_task[0])
+        print("This task:", str(task_id) + "." + str(task_block_index), this_task[0])
         task_block_index += 1
     check_defer = wait_in_task(min_time_box * 60)
     if check_defer == True:
