@@ -75,7 +75,7 @@ def get_tasks_per_block(end_time, min_time_box, tasks):
     total_task_seconds = int((end_time - datetime.now()).total_seconds()-null_seconds)
 
     # Get the number of expected blocks in the time available
-    if (total_task_seconds < 0): total_task_seconds = 1 
+    if (total_task_seconds < 1): total_task_seconds = 1 
     expected_blocks = math.ceil(total_task_seconds/(adjusted_min_time_box*60))
     print('Remaining task blocks:',expected_blocks)
     
