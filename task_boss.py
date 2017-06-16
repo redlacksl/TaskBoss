@@ -88,9 +88,9 @@ def get_tasks_per_block(end_time, min_time_box, tasks):
     
 sa = sys.argv
 lsa = len(sys.argv)
-if lsa != 6:
+if lsa != 5:
     print ("Usage: [ python ] task_boss.py file_name minimum_time_box(minutes) end_hour(24hr format) end_minute")
-    print ("Example: [ python ] task_boss.py working_path file.txt 15 16 30")
+    print ("Example: [ python ] task_boss.py file.txt 15 16 30")
     print ("The program assumes the task list has a header row and will ignore it")
     sa.append(input("Filename: "))
     sa.append(input("Min Time Box: "))
