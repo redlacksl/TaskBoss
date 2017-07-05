@@ -137,7 +137,10 @@ while len(tasks) > 0:
     task_block.sort(reverse=True)
     task_block_index = 1
     for this_task in task_block:
-        print("This task:", str(task_id) + "." + str(task_block_index), this_task[0])
+        try:
+            print("This task:", str(task_id) + "." + str(task_block_index), this_task[0])
+        except Exception:
+            print('Badly formatted task found. Skipping...')
         task_block_index += 1
     check_defer = wait_in_task(min_time_box * 60)
     if check_defer == True:
